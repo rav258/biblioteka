@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - System Biblioteczny</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <header>
+        <h1>Dashboard Systemu Bibliotecznego</h1>
+        <div style="display: flex;justify-content: space-between;">
+            <div id="user-info">
+            </div>
+            <div>
+                <img style="height: 170px;" src="https://scientia.themerex.net/wp-content/uploads/2018/01/post-10-copyright-760x507.jpg"></img>
+            </div>
+        </div>
+    
+    </header>
+    <nav>
+        <!-- Linki do różnych sekcji, np. lista książek, wypożyczenia, rezerwacje, itp. -->
+        <a href="#books-section">Książki</a>
+        <a href="#loans-section">Wypożyczenia</a>
+        <a href="#reservations-section">Rezerwacje</a>
+    </nav>
+    <main>
+        <section id="books-section">
+            <h2>Książki</h2>
+            <button id="addBookBtn" style="display: none;">Dodaj książkę</button>
+            <div id="books-list">
+            </div>
+            <div id="pagination">
+            </div>
+        </section>
+        <section id="loans-section">
+            <h2>Wypożyczenia</h2>
+            <div id="loans-list">
+                <!-- Lista wypożyczeń -->
+            </div>
+        </section>
+        <section id="reservations-section">
+            <h2>Rezerwacje</h2>
+            <div id="reservations-list">
+                <!-- Lista rezerwacji -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Biblioteka Główna. Wszelkie prawa zastrzeżone.</p>
+    </footer>
+    <script src="js/dashboard.js"></script>
+
+    <div id="addBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="addBookForm">
+                <h2>Dodaj Książkę</h2>
+                <input type="text" id="title" placeholder="Tytuł" required>
+                <select id="authorSelect">
+                    <option value="">Wybierz autora...</option>
+                </select>
+                <input type="text" id="newAuthor" placeholder="Nowy autor (opcjonalnie)" >
+                <select id="categorySelect">
+                    <option value="">Wybierz kategorię...</option>
+                </select>
+                
+                <input type="date" id="publishDate" placeholder="Data Publikacji" required>
+                <textarea id="description" placeholder="Opis" required></textarea>
+                <input type="number" id="copyCount" placeholder="Ilość Kopii" required>
+                <button type="submit">Dodaj Książkę</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
