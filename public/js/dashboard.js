@@ -42,23 +42,31 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
     }
 
-    function fetchBooks(page) {
+    function fetchBooks(page, title = '', author = '', category = '') {
       const offset = (page - 1) * itemsPerPage;
-      fetch(`/api/books?limit=${itemsPerPage}&offset=${offset}`, {
+      const queryParams = new URLSearchParams({
+        limit: itemsPerPage,
+        offset: offset,
+        title: title,
+        author: author,
+        category: category
+    });
+      fetch(`/api/books?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
         .then((response) => response.json())
         .then((data) => {
-          const { books, totalItems } = data; // Zakładamy, że backend zwraca listę książek oraz całkowitą liczbę książek
+          const { books, totalItems } = data;
           booksListDiv.innerHTML = "";
           books.forEach((book) => {
             const bookElement = document.createElement("div");
             bookElement.className = "book";
             bookElement.innerHTML = `
-                    <h3>${book.tytul}</h3>
+                    <h3>Tytuł: ${book.tytul}</h3>
                     <p>Autorzy: ${book.autorzy}</p>
+                    <p>Kategoria: ${book.nazwa}</p>
                     <p>Data Publikacji: ${book.data_publikacji}</p>
                     <p>Ilość Kopii: ${book.ilosc_kopii}</p>
                     <p>Opis: ${book.opis}</p>
@@ -86,7 +94,25 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    fetchBooks(currentPage);
+    const searchBooksForm = document.getElementById("searchBooksForm");
+
+    let firstStart = true;
+    searchBooksForm.addEventListener("submit", (e) => {
+        e.preventDefault(); 
+
+        const searchTitle = document.getElementById("searchTitle").value;
+        const searchAuthor = document.getElementById("searchAuthor").value;
+        const searchCategory = document.getElementById("searchCategory").value;
+
+        
+        fetchBooks(1, searchTitle, searchAuthor, searchCategory);
+        firstStart = false;
+    });
+
+    if(firstStart){
+      fetchBooks(currentPage);
+    }
+
 
     fetch("/api/loans/history", {
       headers: {
@@ -188,17 +214,15 @@ document.addEventListener("DOMContentLoaded", function () {
               return response.json();
             })
             .then((data) => {
-              console.log(data.message); // Wyświetl informację o pomyślnym dodaniu książki
-              // Możesz też odświeżyć listę książek, aby pokazać nowo dodaną książkę
+              console.log(data.message);
               addBookModal.style.display = "none";
             })
             .catch((error) => {
               console.error("Błąd:", error);
             });
 
-          console.log("Formularz wysłany!"); // Tymczasowy log
-          // ...
-          // Po wysłaniu danych, możesz zamknąć modal:
+          console.log("Formularz wysłany!");
+        
           addBookModal.style.display = "none";
         });
       });

@@ -109,26 +109,63 @@ app.post("/api/users/register", async (req, res) => {
 app.get("/api/books", (req, res) => {
     const limit = parseInt(req.query.limit) || 3;
     const offset = parseInt(req.query.offset) || 0;
+    const searchTitle = req.query.title || '';
+    const searchAuthor = req.query.author || '';
+    const searchCategory = req.query.category || '';
+
+    // Build the WHERE clause for filtering based on search criteria
+    let whereClause = '1'; // Default to a true condition if no filters are provided
+    const params = [];
+
+    if (searchTitle) {
+        whereClause += ' AND Ksiazki.tytul LIKE ?';
+        params.push(`%${searchTitle}%`);
+    }
+
+    if (searchAuthor) {
+        whereClause += ' AND CONCAT(Autorzy.imie, " ", Autorzy.nazwisko) LIKE ?';
+        params.push(`%${searchAuthor}%`);
+    }
+    
+    if (searchCategory) {
+        whereClause += ' AND nazwa LIKE ?';
+        params.push(`%${searchCategory}%`);
+    }
 
     pool.query(
-        "SELECT COUNT(*) AS totalItems FROM Ksiazki",
+        `SELECT COUNT(distinct Ksiazki.tytul) AS totalItems 
+        FROM Ksiazki 
+        LEFT JOIN Autorzy_Ksiazki ON Ksiazki.id = Autorzy_Ksiazki.id_ksiazki 
+        LEFT JOIN Autorzy ON Autorzy_Ksiazki.id_autora = Autorzy.id 
+        LEFT JOIN kategorie ON Ksiazki.id_kategorii = kategorie.id 
+        WHERE ` + whereClause,
+        params,
         (error, countResults) => {
             if (error) {
-                return res.status(500).json({error});
+                return res.status(500).json({ error });
             }
 
             const totalItems = countResults[0].totalItems;
 
+            // Construct the SQL query with the WHERE clause based on search criteria
+            const query = `
+                SELECT Ksiazki.*, GROUP_CONCAT(Autorzy.imie, " ", Autorzy.nazwisko) AS autorzy, kategorie.*
+                FROM Ksiazki 
+                LEFT JOIN Autorzy_Ksiazki ON Ksiazki.id = Autorzy_Ksiazki.id_ksiazki 
+                LEFT JOIN Autorzy ON Autorzy_Ksiazki.id_autora = Autorzy.id 
+                LEFT JOIN kategorie ON Ksiazki.id_kategorii = kategorie.id 
+                WHERE ${whereClause}
+                GROUP BY Ksiazki.id
+                LIMIT ? OFFSET ?`;
+
+
+
             pool.query(
-                'SELECT Ksiazki.*, GROUP_CONCAT(Autorzy.imie, " ", Autorzy.nazwisko) AS autorzy FROM Ksiazki ' +
-                "LEFT JOIN Autorzy_Ksiazki ON Ksiazki.id = Autorzy_Ksiazki.id_ksiazki " +
-                "LEFT JOIN Autorzy ON Autorzy_Ksiazki.id_autora = Autorzy.id " +
-                "GROUP BY Ksiazki.id " +
-                "LIMIT ? OFFSET ?",
-                [limit, offset],
+                query,
+                [...params, limit, offset],
                 (error, results) => {
                     if (error) {
-                        return res.status(500).json({error});
+                        return res.status(500).json({ error });
                     }
                     res.json({
                         books: results,
@@ -139,6 +176,9 @@ app.get("/api/books", (req, res) => {
         }
     );
 });
+
+
+
 
 //Pobieranie szczegółów książki
 app.get("/api/books/:bookId", (req, res) => {

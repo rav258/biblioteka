@@ -27,8 +27,14 @@
     </nav>
     <main>
         <section id="books-section">
-            <h2>Książki</h2>
             <button id="addBookBtn" style="display: none;">Dodaj książkę</button>
+            <form id="searchBooksForm">
+                <h2>Wyszukiwanie Książek</h2>
+                <input type="text" id="searchTitle" placeholder="Tytuł">
+                <input type="text" id="searchAuthor" placeholder="Autor">
+                <input type="text" id="searchCategory" placeholder="Kategoria">
+                <button type="submit">Szukaj</button>
+            </form>
             <div id="books-list">
             </div>
             <div id="pagination">
